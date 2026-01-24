@@ -1,0 +1,30 @@
+steps:
+# 1. Build the Docker image using the Dockerfile
+- name: 'gcr.io/cloud-builders/docker'
+  args: 
+    [
+      'build', 
+      '-t', 
+      'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA', 
+      '.'
+    ]
+
+# 2. Push the built Docker image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA']
+
+# 3. Deploy the new image to the existing Cloud Run service
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'deploy'
+    - 'my-api-service' # This is the name of your Cloud Run service
+    - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA'
+    - '--region=us-central1'
+    - '--platform=managed'
+    - '--allow-unauthenticated'
+
+# This tells Cloud Build to make the image available after the build
+images:
+- 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA'
