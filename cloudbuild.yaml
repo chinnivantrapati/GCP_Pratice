@@ -25,6 +25,12 @@ steps:
     - '--platform=managed'
     - '--allow-unauthenticated'
 
-# This tells Cloud Build to make the image available after the build
+# This tells Cloud Build where to store the final image
 images:
 - 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA'
+
+# --- ADD THIS NEW SECTION AT THE END ---
+# This option tells Cloud Build to send logs directly to Cloud Logging,
+# which is required by your organization's security policy.
+options:
+  logging: CLOUD_LOGGING_ONLY
