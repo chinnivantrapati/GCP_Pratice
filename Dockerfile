@@ -1,30 +1,22 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
+# Stage 1: The Build Environment (uses the .NET SDK)
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
 
+# Copy the project file and restore all NuGet packages.
+# This is done in a separate step to take advantage of Docker's layer caching.
+COPY GCP_Pratice.csproj ./
+RUN dotnet restore
 
-# This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["GCP_Pratice/GCP_Pratice.csproj", "GCP_Pratice/"]
-RUN dotnet restore "./GCP_Pratice/GCP_Pratice.csproj"
-COPY . .
-WORKDIR "/src/GCP_Pratice"
-RUN dotnet build "./GCP_Pratice.csproj" -c $BUILD_CONFIGURATION -o /app/build
+# Copy the rest of the application's source code.
+COPY . ./
 
-# This stage is used to publish the service project to be copied to the final stage
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./GCP_Pratice.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Build and publish the release version of the application.
+RUN dotnet publish -c Release -o out
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
+# Stage 2: The Final Production Image (uses the much smaller ASP.NET runtime)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build-env /app/out .
+
+# Set the entry point for the container to run the application.
 ENTRYPOINT ["dotnet", "GCP_Pratice.dll"]
