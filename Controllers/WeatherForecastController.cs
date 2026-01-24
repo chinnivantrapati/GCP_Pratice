@@ -8,7 +8,7 @@ namespace GCP_Pratice.Controllers
     {
         private static readonly string[] Summaries = new[]
         {
-            "Final test","CI/CD Magic!", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+            "Final test by Vasu","CI/CD Magic!", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
