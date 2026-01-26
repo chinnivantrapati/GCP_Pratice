@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using GCP_Pratice.Data; 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
