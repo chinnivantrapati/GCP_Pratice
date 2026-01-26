@@ -1,23 +1,25 @@
 steps:
-# Step 1: Build the Docker image using the Dockerfile
+# Step 1: Build the Docker image
 - name: 'gcr.io/cloud-builders/docker'
-  args: 
-    [
-      'build', 
-      '-t', 
-      'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA', 
-      '.'
-    ]
+  args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA', '.']
   id: 'Build Image'
 
-# Step 2: Push the built Docker image to Artifact Registry
+# Step 2: Push the Docker image
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA']
   waitFor: ['Build Image']
   id: 'Push Image'
 
-# Step 3: Run Database Migrations to update the schema
-# This step runs 'dotnet ef database update' using a special builder that can connect to Cloud SQL.
+# --- NEW STEP 3: Restore the EF Core Tool ---
+# This step reads the .config/dotnet-tools.json file and installs the 'dotnet-ef' tool.
+- name: 'mcr.microsoft.com/dotnet/sdk:8.0'
+  entrypoint: 'dotnet'
+  args: ['tool', 'restore']
+  waitFor: ['Push Image']
+  id: 'Restore EF Tool'
+
+# Step 4: Run Database Migrations
+# This step can now find and use the 'dotnet ef' command.
 - name: 'gcr.io/google-appengine/exec-wrapper'
   args:
     - '-i'
@@ -31,17 +33,16 @@ steps:
     - 'update'
     - '--project'
     - 'GCP_Pratice.csproj'
-  waitFor: ['Push Image']
+  waitFor: ['Restore EF Tool'] # This now waits for the tool to be restored.
   id: 'Run Migrations'
 
-# Step 4: Deploy the new image to the existing Cloud Run service
-# This step will only run after the database migration is successful.
+# Step 5: Deploy the image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
   args:
     - 'run'
     - 'deploy'
-    - 'my-api-service' # This is the name of your Cloud Run service
+    - 'my-api-service'
     - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA'
     - '--region=us-central1'
     - '--platform=managed'
@@ -50,10 +51,8 @@ steps:
     - '--set-env-vars=ConnectionStrings__DefaultConnection=Server=/cloudsql/winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql;Database=mydotnetapp_db;Uid=api_user;Pwd=8688050907@Vasu'
   waitFor: ['Run Migrations']
     
-# This tells Cloud Build where to store the final image
 images:
 - 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA'
 
-# This option tells Cloud Build to send logs directly to Cloud Logging
 options:
   logging: CLOUD_LOGGING_ONLY
