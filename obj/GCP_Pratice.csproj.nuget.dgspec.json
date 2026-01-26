@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\w118647\\OneDrive - Worldline SA\\Desktop\\GCP\\GCP_Pratice\\GCP_Pratice\\GCP_Pratice.csproj": {}
+    "C:\\Users\\w118647\\Downloads\\GCP_Pratice\\GCP_Pratice\\GCP_Pratice.csproj": {}
   },
   "projects": {
-    "C:\\Users\\w118647\\OneDrive - Worldline SA\\Desktop\\GCP\\GCP_Pratice\\GCP_Pratice\\GCP_Pratice.csproj": {
+    "C:\\Users\\w118647\\Downloads\\GCP_Pratice\\GCP_Pratice\\GCP_Pratice.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\w118647\\OneDrive - Worldline SA\\Desktop\\GCP\\GCP_Pratice\\GCP_Pratice\\GCP_Pratice.csproj",
+        "projectUniqueName": "C:\\Users\\w118647\\Downloads\\GCP_Pratice\\GCP_Pratice\\GCP_Pratice.csproj",
         "projectName": "GCP_Pratice",
-        "projectPath": "C:\\Users\\w118647\\OneDrive - Worldline SA\\Desktop\\GCP\\GCP_Pratice\\GCP_Pratice\\GCP_Pratice.csproj",
+        "projectPath": "C:\\Users\\w118647\\Downloads\\GCP_Pratice\\GCP_Pratice\\GCP_Pratice.csproj",
         "packagesPath": "C:\\Users\\w118647\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\w118647\\OneDrive - Worldline SA\\Desktop\\GCP\\GCP_Pratice\\GCP_Pratice\\obj\\",
+        "outputPath": "C:\\Users\\w118647\\Downloads\\GCP_Pratice\\GCP_Pratice\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -54,6 +54,10 @@
             "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
               "target": "Package",
               "version": "[1.22.1, )"
+            },
+            "Pomelo.EntityFrameworkCore.MySql": {
+              "target": "Package",
+              "version": "[9.0.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
