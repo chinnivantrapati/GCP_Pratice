@@ -1,42 +1,44 @@
 steps:
-# Step 1: Build the Docker image
+# Step 1: Build the Docker image (No change)
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA', '.']
   id: 'Build Image'
 
-# Step 2: Push the Docker image
+# Step 2: Push the Docker image (No change)
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA']
   waitFor: ['Build Image']
   id: 'Push Image'
 
-# --- NEW STEP 3: Restore the EF Core Tool ---
-# This step reads the .config/dotnet-tools.json file and installs the 'dotnet-ef' tool.
+# --- NEW, COMBINED STEP 3: INSTALL TOOLS AND RUN MIGRATIONS ---
+# This single step does everything needed for the migration.
 - name: 'mcr.microsoft.com/dotnet/sdk:8.0'
-  entrypoint: 'dotnet'
-  args: ['tool', 'restore']
-  waitFor: ['Push Image']
-  id: 'Restore EF Tool'
-
-# Step 4: Run Database Migrations
-# This step can now find and use the 'dotnet ef' command.
-- name: 'gcr.io/google-appengine/exec-wrapper'
+  entrypoint: 'bash'
   args:
-    - '-i'
-    - 'mcr.microsoft.com/dotnet/sdk:8.0'
-    - '-s'
-    - 'winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql'
-    - '--'
-    - 'dotnet'
-    - 'ef'
-    - 'database'
-    - 'update'
-    - '--project'
-    - 'GCP_Pratice.csproj'
-  waitFor: ['Restore EF Tool'] # This now waits for the tool to be restored.
+  - '-c'
+  - |
+      # 1. Download and make the Cloud SQL Proxy executable
+      curl -o /usr/local/bin/cloud_sql_proxy https://storage.googleapis.com/cloudsql-proxy/v2.8.1/cloud-sql-proxy.linux.amd64
+      chmod +x /usr/local/bin/cloud_sql_proxy
+      
+      # 2. Start the proxy in the background
+      echo "Starting Cloud SQL Proxy..."
+      cloud_sql_proxy -p /cloudsql winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql &
+      
+      # 3. Wait for the proxy to be ready
+      sleep 5 
+      
+      # 4. Restore the EF Core tool using the manifest file
+      echo "Restoring dotnet-ef tool..."
+      dotnet tool restore
+      
+      # 5. Run the database migration. This command will now find dotnet-ef.
+      echo "Running database migrations..."
+      dotnet ef database update --project GCP_Pratice.csproj
   id: 'Run Migrations'
+  waitFor: ['Push Image']
 
-# Step 5: Deploy the image to Cloud Run
+# Step 4: Deploy the image to Cloud Run (Now waits for the new combined step)
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
   args:
