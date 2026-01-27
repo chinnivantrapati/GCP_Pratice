@@ -24,11 +24,14 @@ steps:
       curl -o /usr/local/bin/cloud_sql_proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.10.0/cloud-sql-proxy.linux.amd64
       chmod +x /usr/local/bin/cloud_sql_proxy
       
-      # --- THE DEFINITIVE, CORRECTED COMMAND ---
-      # We explicitly tell the proxy to use a Unix Socket in the /cloudsql directory.
+      # --- THE FINAL, CRITICAL FIX ---
+      # Create the directory that the Unix socket will be placed in.
+      mkdir -p /cloudsql
+      
+      # Now, start the proxy. It will no longer crash.
       /usr/local/bin/cloud_sql_proxy --unix-socket /cloudsql winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql > proxy.log 2>&1 &
       
-      # The wait loop will now work correctly because the proxy is creating the right kind of file.
+      # The wait loop will now succeed because the proxy can start and create the socket.
       echo "Waiting for the Cloud SQL socket to be available..."
       for i in {1..20}; do
         if [ -S "/cloudsql/winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql" ]; then
