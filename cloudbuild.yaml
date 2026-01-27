@@ -58,10 +58,6 @@ steps:
   waitFor: ['Push Image']
   # Make the DB_PASSWORD secret available as an environment variable for this step
   secretEnv: ['DB_PASSWORD']
-  availableSecrets:
-    secretManager:
-    - versionName: projects/$PROJECT_ID/secrets/my-dotnet-db-password/versions/latest
-      env: 'DB_PASSWORD'
 
 # Step 4: Deploy the image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -82,5 +78,12 @@ steps:
 images:
 - 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA'
 
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+availableSecrets: # This block must be at the top level of the cloudbuild.yaml
+  secretManager:
+  - versionName: projects/$PROJECT_ID/secrets/my-dotnet-db-password/versions/latest
+    env: 'DB_PASSWORD'
 options:
   logging: CLOUD_LOGGING_ONLY
