@@ -56,6 +56,12 @@ steps:
       dotnet ef database update --project GCP_Pratice.csproj
   id: 'Run Migrations'
   waitFor: ['Push Image']
+  # Make the DB_PASSWORD secret available as an environment variable for this step
+  secretEnv: ['DB_PASSWORD']
+  availableSecrets:
+    secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/my-dotnet-db-password/versions/latest
+      env: 'DB_PASSWORD'
 
 # Step 4: Deploy the image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
