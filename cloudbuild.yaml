@@ -69,7 +69,8 @@ steps:
     - '--platform=managed'
     - '--allow-unauthenticated'
     - '--add-cloudsql-instances=winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql'
-    - '--set-env-vars=ConnectionStrings__DefaultConnection=Server=/cloudsql/winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql;Database=mydotnetapp_db;Uid=api_user;Pwd=8688050907@Vasu'
+    - '--set-env-vars=ConnectionStrings__DefaultConnection=Server=/cloudsql/winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql;Database=mydotnetapp_db;Uid=api_user'
+    - '--update-secrets=DB_PASSWORD=my-dotnet-db-password:latest'
   waitFor: ['Run Migrations']
     
 images:
