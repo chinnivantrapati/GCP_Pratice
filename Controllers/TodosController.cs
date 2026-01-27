@@ -22,5 +22,29 @@ namespace GCP_Pratice.Controllers
         {
             return await _context.Todos.ToListAsync();
         }
+
+        // POST: api/todos
+        [HttpPost]
+        public async Task<ActionResult<Todo>> CreateTodo(Todo todo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _context.Todos.Add(todo);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetTodo), new { id = todo.Id }, todo);
+        }
+
+        // GET: api/todos/1
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Todo>> GetTodo(int id)
+        {
+            var todo = await _context.Todos.FindAsync(id);
+            if (todo == null) return NotFound();
+            return todo;
+        }
     }
 }
