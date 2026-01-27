@@ -1,0 +1,12 @@
+# Standard .NET .gitignore file
+
+## Ignore Visual Studio temporary files, build results, and caches
+.vs/
+[Bb]in/
+[Oo]bj/
+
+# Other common files to ignore
+*.user
+*.suo
+*.userosscache
+*.sln.docstates

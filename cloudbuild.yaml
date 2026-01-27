@@ -10,35 +10,38 @@ steps:
   waitFor: ['Build Image']
   id: 'Push Image'
 
-# --- NEW, COMBINED STEP 3: INSTALL TOOLS AND RUN MIGRATIONS ---
-# This single step does everything needed for the migration.
+# Step 3: Clean, Restore Tools, and Run Migrations
 - name: 'mcr.microsoft.com/dotnet/sdk:8.0'
   entrypoint: 'bash'
   args:
   - '-c'
   - |
-      # 1. Download and make the Cloud SQL Proxy executable
+      # 1. Clean the project to remove any cached local artifacts
+      echo "Cleaning the project..."
+      dotnet clean GCP_Pratice.csproj
+
+      # 2. Restore packages to get dependencies
+      echo "Restoring NuGet packages..."
+      dotnet restore GCP_Pratice.csproj
+
+      # 3. Download and start the Cloud SQL Proxy
+      echo "Starting Cloud SQL Proxy..."
       curl -o /usr/local/bin/cloud_sql_proxy https://storage.googleapis.com/cloudsql-proxy/v2.8.1/cloud-sql-proxy.linux.amd64
       chmod +x /usr/local/bin/cloud_sql_proxy
-      
-      # 2. Start the proxy in the background
-      echo "Starting Cloud SQL Proxy..."
       cloud_sql_proxy -p /cloudsql winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql &
-      
-      # 3. Wait for the proxy to be ready
       sleep 5 
       
-      # 4. Restore the EF Core tool using the manifest file
+      # 4. Restore the EF Core tool
       echo "Restoring dotnet-ef tool..."
       dotnet tool restore
       
-      # 5. Run the database migration. This command will now find dotnet-ef.
+      # 5. Run the database migration
       echo "Running database migrations..."
       dotnet ef database update --project GCP_Pratice.csproj
   id: 'Run Migrations'
   waitFor: ['Push Image']
 
-# Step 4: Deploy the image to Cloud Run (Now waits for the new combined step)
+# Step 4: Deploy the image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
   args:
