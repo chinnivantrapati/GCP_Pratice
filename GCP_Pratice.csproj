@@ -9,12 +9,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- This version is correct for .NET 8 -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+
+    <!-- This is for Visual Studio, it's fine to leave -->
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+
+    <!--
+      THIS IS THE CRITICAL FIX:
+      Changed version from 9.0.0 (for .NET 9) to 8.0.2 (for .NET 8)
+    -->
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
+
+    <!-- This is for Swagger, it's fine -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
