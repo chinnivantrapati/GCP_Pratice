@@ -1,10 +1,10 @@
 steps:
-# Step 1: Build the Docker image (No change)
+# Step 1: Build the Docker image
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA', '.']
   id: 'Build Image'
 
-# Step 2: Push the Docker image (No change)
+# Step 2: Push the Docker image
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/dotnet-apps/my-web-api:$SHORT_SHA']
   waitFor: ['Build Image']
@@ -16,26 +16,20 @@ steps:
   args:
   - '-c'
   - |
-      # 1. Clean the project to remove any cached local artifacts
-      echo "Cleaning the project..."
+      echo "Cleaning and Restoring project..."
       dotnet clean GCP_Pratice.csproj
-
-      # 2. Restore packages to get dependencies
-      echo "Restoring NuGet packages..."
       dotnet restore GCP_Pratice.csproj
-
-      # 3. Download and start the Cloud SQL Proxy
+      
       echo "Starting Cloud SQL Proxy..."
-      curl -o /usr/local/bin/cloud_sql_proxy https://storage.googleapis.com/cloudsql-proxy/v2.8.1/cloud-sql-proxy.linux.amd64
+      # THIS IS THE CORRECT, UPDATED URL
+      curl -o /usr/local/bin/cloud_sql_proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.10.0/cloud-sql-proxy.linux.amd64
       chmod +x /usr/local/bin/cloud_sql_proxy
       cloud_sql_proxy -p /cloudsql winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql &
       sleep 5 
       
-      # 4. Restore the EF Core tool
       echo "Restoring dotnet-ef tool..."
       dotnet tool restore
       
-      # 5. Run the database migration
       echo "Running database migrations..."
       dotnet ef database update --project GCP_Pratice.csproj
   id: 'Run Migrations'
