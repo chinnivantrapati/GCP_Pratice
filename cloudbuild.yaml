@@ -20,13 +20,32 @@ steps:
       dotnet clean GCP_Pratice.csproj
       dotnet restore GCP_Pratice.csproj
       
-      echo "Starting Cloud SQL Proxy..."
+      echo "Downloading and starting Cloud SQL Proxy..."
       curl -o /usr/local/bin/cloud_sql_proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.10.0/cloud-sql-proxy.linux.amd64
       chmod +x /usr/local/bin/cloud_sql_proxy
       
-      # THIS IS THE CORRECTED COMMAND FOR THE V2 PROXY
-      /usr/local/bin/cloud_sql_proxy winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql &
-      sleep 5 
+      # Start proxy in the background
+      /usr/local/bin/cloud_sql_proxy winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql > proxy.log 2>&1 &
+      
+      # --- THE CORRECTED WAIT LOOP ---
+      echo "Waiting for the Cloud SQL socket to be available..."
+      for i in {1..20}; do
+        # The -S flag checks for a SOCKET file, which is correct. -d was wrong.
+        if [ -S "/cloudsql/winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql" ]; then
+          echo "Cloud SQL socket is ready!"
+          break
+        fi
+        echo "Waiting... (attempt $i)"
+        sleep 1
+      done
+      
+      # Final check after the loop
+      if [ ! -S "/cloudsql/winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql" ]; then
+        echo "Error: Cloud SQL socket did not appear after 20 seconds."
+        echo "--- Proxy Logs ---"
+        cat proxy.log
+        exit 1
+      fi
       
       echo "Restoring dotnet-ef tool..."
       dotnet tool restore
