@@ -21,10 +21,11 @@ steps:
       dotnet restore GCP_Pratice.csproj
       
       echo "Starting Cloud SQL Proxy..."
-      # THIS IS THE CORRECT, UPDATED URL
       curl -o /usr/local/bin/cloud_sql_proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.10.0/cloud-sql-proxy.linux.amd64
       chmod +x /usr/local/bin/cloud_sql_proxy
-      cloud_sql_proxy -p /cloudsql winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql &
+      
+      # THIS IS THE CORRECTED COMMAND FOR THE V2 PROXY
+      /usr/local/bin/cloud_sql_proxy winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql &
       sleep 5 
       
       echo "Restoring dotnet-ef tool..."
