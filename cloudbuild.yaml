@@ -55,9 +55,9 @@ steps:
       echo "Running database migrations..."
       dotnet ef database update --project GCP_Pratice.csproj
   id: 'Run Migrations'
-  waitFor: ['Push Image']
+  waitFor: ['Push Image'] # Ensure this step waits for the image to be pushed
   # Make the DB_PASSWORD secret available as an environment variable for this step
-  secretEnv: ['DB_PASSWORD']
+  secretEnv: ['DB_PASSWORD', 'JWT_SIGNING_KEY']
 
 # Step 4: Deploy the image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -71,8 +71,8 @@ steps:
     - '--platform=managed'
     - '--allow-unauthenticated'
     - '--add-cloudsql-instances=winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql'
-    - '--set-env-vars=ConnectionStrings__DefaultConnection=Server=/cloudsql/winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql;Database=mydotnetapp_db;Uid=api_user'
-    - '--update-secrets=DB_PASSWORD=my-dotnet-db-password:latest'
+    - '--set-env-vars=ConnectionStrings__DefaultConnection=Server=/cloudsql/winged-polygon-485011-t1:us-central1:my-dotnet-db-mysql;Database=mydotnetapp_db;Uid=api_user,Jwt__Issuer=your-api-issuer,Jwt__Audience=your-api-audience'
+    - '--update-secrets=DB_PASSWORD=my-dotnet-db-password:latest,JWT_SIGNING_KEY=my-jwt-signing-key:latest'
   waitFor: ['Run Migrations']
     
 images:
@@ -80,8 +80,10 @@ images:
 
 availableSecrets: # This block must be at the top level of the cloudbuild.yaml
   secretManager:
-  - versionName: projects/$PROJECT_ID/secrets/my-dotnet-db-password/versions/latest
+  - versionName: projects/$PROJECT_ID/secrets/my-dotnet-db-password/versions/latest # For DB password
     env: 'DB_PASSWORD'
+  - versionName: projects/$PROJECT_ID/secrets/my-jwt-signing-key/versions/latest # For JWT signing key
+    env: 'JWT_SIGNING_KEY'
 
 options: # Re-adding the options block
   logging: CLOUD_LOGGING_ONLY

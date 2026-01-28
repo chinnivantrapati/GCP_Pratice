@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GCP_Pratice.Data;
 using GCP_Pratice.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GCP_Pratice.Controllers 
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Add this attribute to protect the entire controller
     public class TodosController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
