@@ -27,8 +27,8 @@ namespace GCP_Pratice.Controllers
         public IActionResult Login([FromBody] LoginModel loginModel)
         {
             // For demonstration purposes, we're using hardcoded credentials.
-            // In a real application, you would validate against a database.
-            if (loginModel.Username == "admin" && loginModel.Password == "8688050907@Vasuyadav")
+            // In a real application, you would validate against a database with hashed passwords.
+            if (loginModel.Username == "admin" && loginModel.Password == "SuperSecurePassword123!") // Use a stronger, different password
             {
                 var jwtSigningKey = Environment.GetEnvironmentVariable("JWT_SIGNING_KEY") ?? _configuration["Jwt:Key"];
                 if (string.IsNullOrEmpty(jwtSigningKey))
