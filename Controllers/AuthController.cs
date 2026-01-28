@@ -28,7 +28,7 @@ namespace GCP_Pratice.Controllers
         {
             // For demonstration purposes, we're using hardcoded credentials.
             // In a real application, you would validate against a database with hashed passwords.
-            if (loginModel.Username == "admin" && loginModel.Password == "SuperSecurePassword123!") // Use a stronger, different password
+            if (loginModel.Username == "admin" && loginModel.Password == "ThisIsAVeryLongAndSecureKeyForJwtSigningInMyDotnetApiProject12345!@#$")
             {
                 var jwtSigningKey = Environment.GetEnvironmentVariable("JWT_SIGNING_KEY") ?? _configuration["Jwt:Key"];
                 if (string.IsNullOrEmpty(jwtSigningKey))
